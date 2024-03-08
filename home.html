@@ -8,11 +8,17 @@
     <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap" rel="stylesheet" />
 
     <title>Kopi Kenangan Senja</title>
+
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Alpine Js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="src/app.js"></script>
 
     <!-- css -->
     <link rel="stylesheet" href="css/home.css" />
@@ -20,7 +26,7 @@
 
   <body>
     <!-- Navbar -->
-    <nav class="navbar">
+    <nav class="navbar" x-data>
       <a href="#" class="navbar-logo">kenangan<span>Senja</span>.</a>
 
       <div class="navbar-nav">
@@ -33,7 +39,10 @@
 
       <div class="navbar-extra">
         <a href="#" id="search-button"><i data-feather="search"></i></a>
-        <a href="#" id="cart-button"><i data-feather="shopping-cart"></i></a>
+        <a href="#" id="cart-button">
+          <i data-feather="shopping-cart"></i>
+          <span class="quantity-badge" x-show="$store.cart.quantity" x-text="$store.cart.quantity"></span>
+        </a>
         <a href="#" id="hamburger-menu"><i data-feather="menu"></i></a>
       </div>
 
@@ -46,29 +55,42 @@
 
       <!-- Shopping Cart -->
       <div class="shopping-cart">
-        <div class="card-item">
-          <img src="img/Produk/Local coffee beans.jpg" alt="Biji Kopi" />
-          <div class="item-detail">
-            <h3>Biji Kopi Lokal</h3>
-            <div class="item-price">IDR 39K</div>
+        <template x-for="(item, index) in $store.cart.items" x-keys="index">
+          <div class="cart-item">
+            <img :src="`img/Produk/${item.img}`" :alt="item.name" />
+            <div class="item-detail">
+              <h3 x-text="item.name"></h3>
+              <div class="item-price">
+                <span x-text="rupiah(item.price)"></span> &times;
+                <button id="remove" @click="$store.cart.remove(item.id)">&minus;</button>
+                <span x-text="item.quantity"></span>
+                <button id="add" @click="$store.cart.add(item)">&plus;</button> &equals;
+                <span x-text="rupiah(item.total)"></span>
+              </div>
+            </div>
           </div>
-          <i data-feather="trash-2" class="remove-item"></i>
-        </div>
-        <div class="card-item">
-          <img src="img/Produk/Local coffee beans.jpg" alt="Biji Kopi" />
-          <div class="item-detail">
-            <h3>Biji Kopi Lokal</h3>
-            <div class="item-price">IDR 39K</div>
-          </div>
-          <i data-feather="trash-2" class="remove-item"></i>
-        </div>
-        <div class="card-item">
-          <img src="img/Produk/Local coffee beans.jpg" alt="Biji Kopi" />
-          <div class="item-detail">
-            <h3>Biji Kopi Lokal</h3>
-            <div class="item-price">IDR 39K</div>
-          </div>
-          <i data-feather="trash-2" class="remove-item"></i>
+        </template>
+        <h4 x-show="!$store.cart.items.length" style="margin-top: 1rem">Keranjangmu Kosong</h4>
+        <h4 x-show="$store.cart.items.length">Total : <span x-text="rupiah($store.cart.total)"></span></h4>
+
+        <div class="form-container" x-show="$store.cart.items.length">
+          <form action="" id="checkout-form">
+            <h5>Detail Pelanggan</h5>
+            <label for="name">
+              <span>Name</span>
+              <input type="text" name="name" id="name" />
+            </label>
+            <label for="email">
+              <span>Email</span>
+              <input type="email" name="email" id="email" />
+            </label>
+            <label for="phone">
+              <span>No Hp</span>
+              <input type="number" name="phone" id="phone" autocomplete="off" />
+            </label>
+
+            <button class="checkout-button" type="button" id="checkout-button">Checkout</button>
+          </form>
         </div>
       </div>
       <!-- Shopping Cart End -->
@@ -136,81 +158,49 @@
     <!-- Menu Section end -->
 
     <!-- Product Section -->
-    <section class="products" id="products">
+    <section class="products" id="products" x-data="products">
       <h2><span>Produk</span> Kami</h2>
       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse perspiciatis soluta assumenda culpa officiis odio!</p>
 
       <div class="row">
-        <!-- Biji Kopi Lokal -->
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="detail-button"><i data-feather="eye"></i></a>
-          </div>
-          <div class="product-image">
-            <img src="img/Produk/Local coffee beans.jpg" alt="Biji kopi" />
-          </div>
-          <div class="product-content">
-            <h3>Biji Kopi Lokal</h3>
-            <div class="product-stars">
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star"></i>
+        <!-- Produk-->
+        <template x-for="(item, index) in items" x-key="index">
+          <div class="product-card">
+            <div class="product-icons">
+              <a href="#" @click.prevent="$store.cart.add(item)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" fill="white">
+                  <path
+                    d="M0 24C0 10.7 10.7 0 24 0H69.5c22 0 41.5 12.8 50.6 32h411c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3H170.7l5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24 10.7 24 24s-10.7 24-24 24H199.7c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5H24C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="detail-button" @click.prevent>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" fill="white">
+                  <path
+                    d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
+                  />
+                </svg>
+              </a>
             </div>
-
-            <div class="product-price">- IDR 39K <span>IDR 43K </span></div>
-          </div>
-        </div>
-
-        <!-- Biji Kopi Arabika -->
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="detail-button"><i data-feather="eye"></i></a>
-          </div>
-          <div class="product-image">
-            <img src="img/Produk/Arabica.jpg" alt="Biji kopi" />
-          </div>
-          <div class="product-content">
-            <h3>Biji Kopi Arabika</h3>
-            <div class="product-stars">
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star"></i>
+            <div class="product-image">
+              <img :src="`img/Produk/${item.img}`" :alt="item.name" />
             </div>
+            <div class="product-content">
+              <h3 x-text="item.name"></h3>
+              <div class="product-stars"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" fill="gold" stroke="#b6895b" stroke-width="2">
+                <path
+                  d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
+                />
+              </svg>
 
-            <div class="product-price">- IDR 45K <span>IDR 55K </span></div>
-          </div>
-        </div>
-
-        <!-- Biji Kopi Robusta -->
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="detail-button"><i data-feather="eye"></i></a>
-          </div>
-          <div class="product-image">
-            <img src="img/Produk/Robusta.jpg" alt="Biji kopi" />
-          </div>
-          <div class="product-content">
-            <h3>Biji Kopi Robusta</h3>
-            <div class="product-stars">
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
-              <i data-feather="star" class="star-full"></i>
+              <div class="product-price"><span x-text="rupiah(item.price)"></span></div>
             </div>
-
-            <div class="product-price">- IDR 62K <span>IDR 77K </span></div>
           </div>
-        </div>
+        </template>
       </div>
     </section>
+
     <!-- Product Section End -->
 
     <!-- Contact Section -->
@@ -297,8 +287,8 @@
     <script src="js/home.js"></script>
 
     <!-- feather-icons-->
+    <!-- feather-icons-->
     <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace();
     </script>
