@@ -12,13 +12,16 @@
 
     <title>Kopi Kenangan Senja</title>
 
+    <!-- JS Payment gateway -->
+    <script type="text/javascript" src="https://app.stg.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-saQN3yzWs7TW7YuZ"></script>
+
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
 
     <!-- Alpine Js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <script src="src/app.js"></script>
+    <script src="src/app.js" async></script>
 
     <!-- css -->
     <link rel="stylesheet" href="css/home.css" />
@@ -60,6 +63,7 @@
             <img :src="`img/Produk/${item.img}`" :alt="item.name" />
             <div class="item-detail">
               <h3 x-text="item.name"></h3>
+
               <div class="item-price">
                 <span x-text="rupiah(item.price)"></span> &times;
                 <button id="remove" @click="$store.cart.remove(item.id)">&minus;</button>
@@ -70,29 +74,35 @@
             </div>
           </div>
         </template>
+
         <h4 x-show="!$store.cart.items.length" style="margin-top: 1rem">Keranjangmu Kosong</h4>
         <h4 x-show="$store.cart.items.length">Total : <span x-text="rupiah($store.cart.total)"></span></h4>
 
         <div class="form-container" x-show="$store.cart.items.length">
-          <form action="" id="checkout-form">
+          <form action="" id="checkoutForm">
+            <input type="hidden" name="items" x-model="JSON.stringify($store.cart.items)" />
+            <input type="hidden" name="total" x-model="($store.cart.total)" />
             <h5>Detail Pelanggan</h5>
             <label for="name">
               <span>Name</span>
               <input type="text" name="name" id="name" />
             </label>
+
             <label for="email">
               <span>Email</span>
               <input type="email" name="email" id="email" />
             </label>
+
             <label for="phone">
               <span>No Hp</span>
               <input type="number" name="phone" id="phone" autocomplete="off" />
             </label>
 
-            <button class="checkout-button" type="button" id="checkout-button">Checkout</button>
+            <button class="checkout-button disabled" type="button" id="checkout-button" value="checkout">Checkout</button>
           </form>
         </div>
       </div>
+
       <!-- Shopping Cart End -->
     </nav>
     <!-- Navbar End-->

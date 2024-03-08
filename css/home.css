@@ -273,6 +273,11 @@ body {
   margin: 1rem auto;
   cursor: pointer;
 }
+
+.form-container .checkout-button.disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
 /* Checkout Form end */
 /* Navbar end*/
 /* ....................................................... */
